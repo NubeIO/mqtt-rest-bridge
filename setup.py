@@ -6,6 +6,7 @@ import mrb
 
 requirements = [
     'paho-mqtt==1.5.1',
+    'requests==2.25.1',
 ]
 
 setup(name='mqtt-rest-bridge',
