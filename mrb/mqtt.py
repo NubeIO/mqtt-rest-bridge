@@ -78,3 +78,7 @@ class MqttClient(metaclass=Singleton):
 
     def publish_value(self, topic: str, payload: str):
         self.__client.publish(topic, payload, self.config.qos)
+
+    # TODO: req-res
+    def request(self, topic: str, payload: str):
+        self.__client.publish(topic, payload, self.config.qos)
