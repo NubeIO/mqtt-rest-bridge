@@ -1,8 +1,12 @@
 import enum
-import json
 
 import requests
 from mrb.setting import BaseSetting
+
+
+class MessageType(enum.Enum):
+    REQUEST = 'request'
+    RESPONSE = 'response'
 
 
 class HttpMethod(enum.Enum):
@@ -16,29 +20,36 @@ class HttpMethod(enum.Enum):
 
 
 class Request(BaseSetting):
-    def __init__(self, url: str, body: json, headers=None, http_method: HttpMethod = HttpMethod.GET):
-        self.url: str = url
-        self.body: json = body
-        self.headers = headers
-        self.http_method: HttpMethod = http_method
+    def __init__(self, api: str = "", body: dict = None, headers: dict = None,
+                 http_method: HttpMethod = HttpMethod.GET):
+        if body is None:
+            body = {}
+        self.api: str = api
+        self.body: dict = body
+        self.headers: dict = headers
+        self.http_method: str = http_method.value
 
     def request(self):
         from mrb.brige import MqttRestBridge
 
         bridge: MqttRestBridge = MqttRestBridge()
-        request_url: str = 'http://0.0.0.0:{}/{}'.format(bridge.port, self.url)
+        request_url: str = 'http://0.0.0.0:{}/{}'.format(bridge.port, self.api)
         try:
-            resp = requests.request(self.http_method.value, request_url, json=self.body, headers=self.headers)
-            content: str = str(resp.content)
+            resp = requests.request(self.http_method, request_url, json=self.body, headers=self.headers)
+            content: dict = resp.json() if resp.text else {}
             status: int = resp.status_code
             headers = resp.raw.headers.items()
             return Response(content, status, headers)
-        except ConnectionError:
-            pass
+        except Exception as e:
+            return Response(error=True, message=str(e))
 
 
 class Response(BaseSetting):
-    def __init__(self, content: str, status: int, headers=None):
+    def __init__(self, content=None, status: int = 200, headers=None, error: bool = False, message=''):
+        if content is None:
+            content = {}
         self.content: str = content
         self.status: int = status
-        self.headers = headers
+        self.headers = headers  # header is not in dictionary form
+        self.error: bool = error
+        self.message: str = message

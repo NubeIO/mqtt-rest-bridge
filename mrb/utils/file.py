@@ -1,9 +1,6 @@
 def read_file(file) -> str:
-    try:
-        with open(file, "r") as f:
-            return f.read()
-    except Exception:
-        return ""
+    with open(file, "r") as f:
+        return f.read()
 
 
 def write_file(file, content):

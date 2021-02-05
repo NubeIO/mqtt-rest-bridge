@@ -3,7 +3,7 @@ import time
 
 import paho.mqtt.client as mqtt
 
-from mrb.rest import mqtt_to_rest_mapper
+from mrb.mapper import mqtt_to_rest_mapper
 from mrb.setting import MqttSetting
 from mrb.utils.singleton import Singleton
 
@@ -77,8 +77,4 @@ class MqttClient(metaclass=Singleton):
         self.__client.subscribe(self.__subscribe_topic)
 
     def publish_value(self, topic: str, payload: str):
-        self.__client.publish(topic, payload, self.config.qos)
-
-    # TODO: req-res
-    def request(self, topic: str, payload: str):
         self.__client.publish(topic, payload, self.config.qos)

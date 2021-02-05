@@ -2,8 +2,6 @@ import json
 import os
 import uuid
 
-from mrb.mqtt import MqttClient
-
 from mrb.setting import MqttSetting, BaseSetting
 from mrb.utils.file import read_file, write_file
 from mrb.utils.singleton import Singleton
@@ -64,6 +62,7 @@ class MqttRestBridge(metaclass=Singleton):
 
     def reload_mqtt(self, mqtt_setting: MqttSetting):
         self.__mqtt_setting = mqtt_setting
+        from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
         mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#')
         return self
