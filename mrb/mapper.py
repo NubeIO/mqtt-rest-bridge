@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+from threading import Thread
 from time import sleep
 
 from mrb.brige import MqttRestBridge
@@ -19,6 +20,10 @@ def mqtt_to_rest_mapper(client, userdata, message):
     :<session_uuid>             for particular request/response cycle
     (there could be multiple request response for same REST request)
     """
+    Thread(target=_mqtt_to_rest_mapper, kwargs={'message': message}).start()
+
+
+def _mqtt_to_rest_mapper(message):
     topic = message.topic.split('/')
     if len(topic) != 5:
         return
@@ -45,13 +50,13 @@ def mqtt_to_rest_mapper(client, userdata, message):
         Store().add(session_uuid, response)
 
 
-def api_to_topic_mapper(api: str, destination: str, body: dict = None, headers: dict = None,
+def api_to_topic_mapper(api: str, destination_identifier: str, body: dict = None, headers: dict = None,
                         http_method: HttpMethod = HttpMethod.GET) -> Response:
     mrb: MqttRestBridge = MqttRestBridge()
     source: str = mrb.identifier
     global_uuid: str = mrb.global_uuid
     session_uuid: str = __create_uuid()
-    topic: str = "/".join([global_uuid, destination, source, MessageType.REQUEST.value, session_uuid])
+    topic: str = "/".join([global_uuid, destination_identifier, source, MessageType.REQUEST.value, session_uuid])
     logger.debug(f'request topic: {topic}')
     request: Request = Request(api, body, headers, http_method)
     payload: str = request.serialize()
@@ -59,8 +64,8 @@ def api_to_topic_mapper(api: str, destination: str, body: dict = None, headers: 
     logger.debug(f'publishing to MQTT...')
     from mrb.mqtt import MqttClient
     MqttClient().publish_value(topic, payload)
-    # TODO: timeout
     while True:
+        # TODO: timeout
         sleep(0.01)
         response: Response = Store().get(session_uuid)
         if response:

@@ -10,15 +10,16 @@ from mrb.utils.singleton import Singleton
 class MqttRestBridge(metaclass=Singleton):
     default_global_uuid_file = 'global_uuid.txt'
 
-    def __init__(self, **kwargs):
-        self.__port: int = kwargs.get('port') or 8080
-        self.__identifier: str = kwargs.get('identifier') or 'identifier'
-        self.__prod: bool = kwargs.get('prod') or False
-        self.__mqtt_setting = None
+    def __init__(self, port: int = 8080, identifier: str = 'identifier', prod: bool = False,
+                 mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None):
+        self.__port: int = port
+        self.__identifier: str = identifier
+        self.__prod: bool = prod
+        self.__mqtt_setting: MqttSetting = mqtt_setting
         self.__data_dir = None
         self.__global_uuid: str = 'local'
         if self.__prod:
-            self.__data_dir = self.__compute_dir(kwargs.get('data_dir') or '/data/mqtt-rest-bridge')
+            self.__data_dir = self.__compute_dir(data_dir or '/data/mqtt-rest-bridge')
             self.__global_uuid_file = os.path.join(self.data_dir, self.default_global_uuid_file)
             self.__global_uuid = self.__handle_global_uuid(self.global_uuid_file)
 
@@ -60,8 +61,7 @@ class MqttRestBridge(metaclass=Singleton):
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload_mqtt(self, mqtt_setting: MqttSetting):
-        self.__mqtt_setting = mqtt_setting
+    def start(self):
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
         mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#')

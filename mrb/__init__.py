@@ -3,4 +3,4 @@ MQTT-REST-Bridge
 """
 
 __version__ = '1.0.0'
-__author__ = 'RaiBnod'
+__author__ = 'NubeIO'
