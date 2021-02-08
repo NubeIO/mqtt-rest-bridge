@@ -35,7 +35,8 @@ class Request(BaseSetting):
         bridge: MqttRestBridge = MqttRestBridge()
         request_url: str = 'http://0.0.0.0:{}/{}'.format(bridge.port, self.api)
         try:
-            resp = requests.request(self.http_method, request_url, json=self.body, headers=self.headers)
+            resp = requests.request(self.http_method, request_url, json=self.body, headers=self.headers,
+                                    params={'bridge': True})
             status: int = resp.status_code
             try:
                 content: dict = resp.json() if resp.text else {}
@@ -51,7 +52,7 @@ class Response(BaseSetting):
     def __init__(self, content=None, status: int = 200, headers=None, error: bool = False, message=''):
         if content is None:
             content = {}
-        self.content: str = content
+        self.content: dict = content
         self.status: int = status
         self.headers = headers  # header is not in dictionary form
         self.error: bool = error

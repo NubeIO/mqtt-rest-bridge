@@ -61,3 +61,20 @@ from mrb.message import Response, HttpMethod
 response: Response = api_to_topic_mapper(api=f'/api/generic/networks/b7a23aa5-b8a1-4a0f-9acf-4fb011bce50e',
                                          destination_identifier=f'ps', http_method=HttpMethod.DELETE)
 ```
+
+### Check response is valid or not
+
+```python
+from mrb.message import Response
+from mrb.validator import is_valid
+
+mapping: Response = Response()
+is_valid(mapping)  # returns True of False
+```
+
+
+### How to differentiate REST vs MQTT > REST requests
+
+```
+is_bridge(request.args)  # True if MQTT > REST, else REST
+```
