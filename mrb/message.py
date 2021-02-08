@@ -36,8 +36,11 @@ class Request(BaseSetting):
         request_url: str = 'http://0.0.0.0:{}/{}'.format(bridge.port, self.api)
         try:
             resp = requests.request(self.http_method, request_url, json=self.body, headers=self.headers)
-            content: dict = resp.json() if resp.text else {}
             status: int = resp.status_code
+            try:
+                content: dict = resp.json() if resp.text else {}
+            except ValueError:
+                return Response(status=404, error=True, message=resp.text)
             headers = resp.raw.headers.items()
             return Response(content, status, headers)
         except Exception as e:
