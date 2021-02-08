@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import uuid
 from threading import Thread
 from time import sleep
@@ -64,12 +65,17 @@ def api_to_topic_mapper(api: str, destination_identifier: str, body: dict = None
     logger.debug(f'publishing to MQTT...')
     from mrb.mqtt import MqttClient
     MqttClient().publish_value(topic, payload)
+
+    timeout: int = mrb.mqtt_setting.timeout
+    start_time: float = time.time()
     while True:
-        # TODO: timeout
-        sleep(0.01)
-        response: Response = Store().get(session_uuid)
-        if response:
-            return response
+        if time.time() - start_time <= timeout:
+            sleep(0.01)
+            response: Response = Store().get(session_uuid)
+            if response:
+                return response
+        else:
+            return Response(error=True, message=f'timeout, exceed the time {timeout} sec')
 
 
 def __create_uuid() -> str:

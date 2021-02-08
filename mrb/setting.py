@@ -31,3 +31,4 @@ class MqttSetting(BaseSetting):
         self.qos = 1
         self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
+        self.timeout = 10
