@@ -53,6 +53,7 @@ def _mqtt_to_rest_mapper(message):
 
 def api_to_topic_mapper(api: str, destination_identifier: str, body: dict = None, headers: dict = None,
                         http_method: HttpMethod = HttpMethod.GET) -> Response:
+    api: str = api.strip("/")
     mrb: MqttRestBridge = MqttRestBridge()
     source: str = mrb.identifier
     global_uuid: str = mrb.global_uuid
