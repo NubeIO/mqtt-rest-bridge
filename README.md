@@ -17,8 +17,11 @@ poetry remove mqtt-rest-bridge
 
 ### How to integrate
 
-```bash
-MqttRestBridge(port=<int>, identifier=<str>, prod=<True|False>, mqtt_setting=<MqttSetting>)
+```python
+from mrb.brige import MqttRestBridge
+from mrb.setting import MqttSetting
+
+MqttRestBridge(port=8080, identifier=f'identifier', prod=True, mqtt_setting=MqttSetting())
 ```
 
 
@@ -61,17 +64,6 @@ from mrb.message import Response, HttpMethod
 response: Response = api_to_topic_mapper(api=f'/api/generic/networks/b7a23aa5-b8a1-4a0f-9acf-4fb011bce50e',
                                          destination_identifier=f'ps', http_method=HttpMethod.DELETE)
 ```
-
-### Check response is valid or not
-
-```python
-from mrb.message import Response
-from mrb.validator import is_valid
-
-mapping: Response = Response()
-is_valid(mapping)  # returns True of False
-```
-
 
 ### How to differentiate REST vs MQTT > REST requests
 

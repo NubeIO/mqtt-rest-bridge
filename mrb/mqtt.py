@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 class MqttClient(metaclass=Singleton):
 
     def __init__(self):
-        self.__config = None
-        self.__client = None
-        self.__subscribe_topic = None
+        self.__config: MqttSetting = None
+        self.__client: mqtt.Client = None
+        self.__subscribe_topic: str = None
 
     @property
     def config(self) -> MqttSetting:
@@ -77,4 +77,15 @@ class MqttClient(metaclass=Singleton):
         self.__client.subscribe(self.__subscribe_topic)
 
     def publish_value(self, topic: str, payload: str):
-        self.__client.publish(topic, payload, self.config.qos)
+        timeout: int = self.__config.timeout
+        start_time: float = time.time()
+        while True:
+            if self.status():
+                self.__client.publish(topic, payload, self.config.qos)
+                return
+            else:
+                if time.time() - start_time <= timeout:
+                    time.sleep(0.01)
+                else:
+                    logger.error(f'Failed to publish value: {payload}, on topic: {topic}')
+                    return

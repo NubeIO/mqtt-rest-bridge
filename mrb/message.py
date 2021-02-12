@@ -2,6 +2,7 @@ import enum
 
 import requests
 from mrb.setting import BaseSetting
+from mrb.validator import is_valid
 
 
 class MessageType(enum.Enum):
@@ -41,19 +42,25 @@ class Request(BaseSetting):
             try:
                 content: dict = resp.json() if resp.text else {}
             except ValueError:
-                return Response(status=404, error=True, message=resp.text)
+                return Response(status=404, error=True, error_message=resp.text)
+            error: bool = False
+            error_message: str = ''
+            if not is_valid(resp):
+                error = True
+                error_message = content.get('message', '')
+                content = {}
             headers = resp.raw.headers.items()
-            return Response(content, status, headers)
+            return Response(content, status, headers, error, error_message)
         except Exception as e:
-            return Response(error=True, message=str(e))
+            return Response(error=True, error_message=str(e))
 
 
 class Response(BaseSetting):
-    def __init__(self, content=None, status: int = 200, headers=None, error: bool = False, message=''):
+    def __init__(self, content=None, status: int = 200, headers=None, error: bool = False, error_message=''):
         if content is None:
             content = {}
         self.content: dict = content
         self.status: int = status
         self.headers = headers  # header is not in dictionary form
         self.error: bool = error
-        self.message: str = message
+        self.error_message: str = error_message

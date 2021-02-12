@@ -8,7 +8,8 @@ from mrb.utils.singleton import Singleton
 
 
 class MqttRestBridge(metaclass=Singleton):
-    default_global_uuid_file = 'global_uuid.txt'
+    default_global_uuid_file: str = 'global_uuid.txt'
+    out: str = '/data/mqtt-rest-bridge'
 
     def __init__(self, port: int = 8080, identifier: str = 'identifier', prod: bool = False,
                  mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None):
@@ -19,7 +20,7 @@ class MqttRestBridge(metaclass=Singleton):
         self.__data_dir = None
         self.__global_uuid: str = 'local'
         if self.__prod:
-            self.__data_dir = self.__compute_dir(data_dir or '/data/mqtt-rest-bridge')
+            self.__data_dir = self.__compute_dir(data_dir or MqttRestBridge.out)
             self.__global_uuid_file = os.path.join(self.data_dir, self.default_global_uuid_file)
             self.__global_uuid = self.__handle_global_uuid(self.global_uuid_file)
 

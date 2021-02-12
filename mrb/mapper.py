@@ -76,7 +76,8 @@ def api_to_topic_mapper(api: str, destination_identifier: str, body: dict = None
             if response:
                 return response
         else:
-            return Response(error=True, message=f'timeout, exceed the time {timeout} sec')
+            return Response(error=True,
+                            error_message=f'{destination_identifier} request timeout, exceed the time {timeout} secs')
 
 
 def __create_uuid() -> str:
