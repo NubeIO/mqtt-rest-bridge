@@ -21,7 +21,10 @@ poetry remove mqtt-rest-bridge
 from mrb.brige import MqttRestBridge
 from mrb.setting import MqttSetting
 
-MqttRestBridge(port=8080, identifier=f'identifier', prod=True, mqtt_setting=MqttSetting())
+def callback():
+    print('callback...')
+
+MqttRestBridge(port=8080, identifier=f'identifier', prod=True, mqtt_setting=MqttSetting(), callback=callback)
 ```
 
 

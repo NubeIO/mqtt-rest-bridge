@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import Callable
 
 import paho.mqtt.client as mqtt
 
@@ -21,7 +22,7 @@ class MqttClient(metaclass=Singleton):
     def config(self) -> MqttSetting:
         return self.__config
 
-    def start(self, config: MqttSetting, subscribe_topic: str):
+    def start(self, config: MqttSetting, subscribe_topic: str, callback: Callable):
         self.__config = config
         self.__subscribe_topic = subscribe_topic
         logger.info(f'Starting MQTT client[{self.config.name}]...')
@@ -50,6 +51,8 @@ class MqttClient(metaclass=Singleton):
                 logger.error(str(e))
                 return
         logger.info(f'MQTT client {self.config.name} connected {self.to_string()}')
+        if callback:
+            callback()
         self.__client.loop_forever()
 
     def status(self) -> bool:

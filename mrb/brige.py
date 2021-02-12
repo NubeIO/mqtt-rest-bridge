@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+from typing import Callable
 
 from mrb.setting import MqttSetting, BaseSetting
 from mrb.utils.file import read_file, write_file
@@ -12,13 +13,14 @@ class MqttRestBridge(metaclass=Singleton):
     out: str = '/data/mqtt-rest-bridge'
 
     def __init__(self, port: int = 8080, identifier: str = 'identifier', prod: bool = False,
-                 mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None):
+                 mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None, callback: Callable = None):
         self.__port: int = port
         self.__identifier: str = identifier
         self.__prod: bool = prod
         self.__mqtt_setting: MqttSetting = mqtt_setting
         self.__data_dir = None
         self.__global_uuid: str = 'local'
+        self.__callback: Callable = callback
         if self.__prod:
             self.__data_dir = self.__compute_dir(data_dir or MqttRestBridge.out)
             self.__global_uuid_file = os.path.join(self.data_dir, self.default_global_uuid_file)
@@ -65,7 +67,7 @@ class MqttRestBridge(metaclass=Singleton):
     def start(self):
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
-        mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#')
+        mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#', self.__callback)
         return self
 
     @staticmethod
