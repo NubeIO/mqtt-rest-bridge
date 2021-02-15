@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.1.1](https://github.com/NubeIO/lora-raw/tree/v1.1.0) (2020-02-15)
+### Added
+- Don't try to publish value if MQTT is not setup
+
 ## [v1.1.0](https://github.com/NubeIO/lora-raw/tree/v1.1.0) (2020-02-14)
 ### Added
 - Improvement on existing codes
