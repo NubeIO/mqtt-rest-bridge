@@ -71,6 +71,11 @@ class MqttRestBridge(metaclass=Singleton):
         return self
 
     @staticmethod
+    def status():
+        from mrb.mqtt import MqttClient
+        return MqttClient().status()
+
+    @staticmethod
     def __compute_dir(_dir: str, mode=0o744) -> str:
         d = _dir if os.path.isabs(_dir) else os.path.join(os.getcwd(), _dir)
         os.makedirs(d, mode, True)

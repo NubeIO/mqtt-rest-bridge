@@ -56,7 +56,7 @@ class MqttClient(metaclass=Singleton):
         self.__client.loop_forever()
 
     def status(self) -> bool:
-        return self.config and self.config.enabled and self.__client and self.__client.is_connected()
+        return bool(self.config and self.config.enabled and self.__client and self.__client.is_connected())
 
     def to_string(self) -> str:
         return f'{self.config.host}:{self.config.port}'
@@ -80,6 +80,8 @@ class MqttClient(metaclass=Singleton):
         self.__client.subscribe(self.__subscribe_topic)
 
     def publish_value(self, topic: str, payload: str):
+        if not self.__config:
+            return
         timeout: int = self.__config.timeout
         start_time: float = time.time()
         while True:
