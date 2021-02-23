@@ -66,10 +66,10 @@ class MqttRestBridge(metaclass=Singleton):
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def start(self):
+    def start(self, loop_forever=True):
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
-        mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#', self.__callback)
+        mqtt_client.start(self.__mqtt_setting, f'{self.global_uuid}/{self.identifier}/#', self.__callback, loop_forever)
         return self
 
     @staticmethod
