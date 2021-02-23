@@ -1,8 +1,7 @@
 import enum
 
 import requests
-
-from mrb.setting import BaseSetting
+from rubix_mqtt.setting import BaseSetting
 
 
 class MessageType(enum.Enum):

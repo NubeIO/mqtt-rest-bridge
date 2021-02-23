@@ -3,7 +3,9 @@ import os
 import uuid
 from typing import Callable
 
-from mrb.setting import MqttSetting, BaseSetting
+from rubix_mqtt.setting import BaseSetting
+
+from mrb.setting import MqttSetting
 from mrb.utils.file import read_file, write_file
 from mrb.utils.singleton import Singleton
 
