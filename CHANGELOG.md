@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## [v1.1.1](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.0) (2020-02-15)
+## [v1.1.2](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.2) (2020-02-23)
+### Added
+- Use rubix-mqtt base
+- Add a test case
+
+## [v1.1.1](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.1) (2020-02-15)
 ### Added
 - Don't try to publish value if MQTT is not setup
 
