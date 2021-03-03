@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.1.3](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.3) (2020-02-03)
+### Added
+- MQTT message listener issue fix
+
 ## [v1.1.2](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.2) (2020-02-23)
 ### Added
 - Use rubix-mqtt base
