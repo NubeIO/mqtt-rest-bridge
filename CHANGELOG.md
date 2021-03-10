@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.1.4](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.4) (2020-03-10)
+### Added
+- Make retain false
+- Upgrade rubix-mqtt version
 
 ## [v1.1.3](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.3) (2020-02-03)
 ### Added
