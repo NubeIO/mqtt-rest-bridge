@@ -20,6 +20,7 @@ class MqttRestBridge(metaclass=Singleton):
         self.__identifier: str = identifier
         self.__prod: bool = prod
         self.__mqtt_setting: MqttSetting = mqtt_setting
+        self.__mqtt_setting.retain = False
         self.__data_dir = None
         self.__global_uuid: str = 'local'
         self.__callback: Callable = callback
@@ -69,7 +70,8 @@ class MqttRestBridge(metaclass=Singleton):
     def start(self, loop_forever=True):
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
-        mqtt_client.start(self.__mqtt_setting, [f'{self.global_uuid}/{self.identifier}/#'], self.__callback, loop_forever)
+        mqtt_client.start(self.__mqtt_setting, [f'{self.global_uuid}/{self.identifier}/#'], self.__callback,
+                          loop_forever)
         return self
 
     @staticmethod
