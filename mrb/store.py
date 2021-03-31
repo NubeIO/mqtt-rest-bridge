@@ -1,5 +1,9 @@
+import threading
+
 from mrb.message import Response
 from mrb.utils.singleton import Singleton
+
+lock = threading.Lock()
 
 
 class Store(metaclass=Singleton):
@@ -7,11 +11,13 @@ class Store(metaclass=Singleton):
         self.__responses = {}
 
     def get(self, uuid: str):
-        response: Response = self.__responses.get(uuid)
-        if response:
-            del self.__responses[uuid]
-            return response
-        return None
+        with lock:
+            response: Response = self.__responses.get(uuid)
+            if response:
+                del self.__responses[uuid]
+                return response
+            return None
 
     def add(self, uuid, response: Response):
-        self.__responses[uuid] = response
+        with lock:
+            self.__responses[uuid] = response
