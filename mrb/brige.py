@@ -1,7 +1,7 @@
 import json
 import os
 import uuid
-from typing import Callable
+from typing import Callable, List
 
 from rubix_mqtt.setting import BaseSetting
 
@@ -14,28 +14,21 @@ class MqttRestBridge(metaclass=Singleton):
     default_global_uuid_file: str = 'global_uuid.txt'
     out: str = '/data/mqtt-rest-bridge'
 
-    def __init__(self, port: int = 8080, identifier: str = 'identifier', prod: bool = False,
-                 mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None, callback: Callable = None):
+    def __init__(self, port: int = 8080, mqtt_setting: MqttSetting = MqttSetting(), data_dir: str = None,
+                 callback: Callable = None):
         self.__port: int = port
-        self.__identifier: str = identifier
-        self.__prod: bool = prod
         self.__mqtt_setting: MqttSetting = mqtt_setting
         self.__mqtt_setting.retain = False
         self.__data_dir = None
         self.__global_uuid: str = 'local'
         self.__callback: Callable = callback
-        if self.__prod:
-            self.__data_dir = self.__compute_dir(data_dir or MqttRestBridge.out)
-            self.__global_uuid_file = os.path.join(self.data_dir, self.default_global_uuid_file)
-            self.__global_uuid = self.__handle_global_uuid(self.global_uuid_file)
+        self.__data_dir = self.__compute_dir(data_dir or MqttRestBridge.out)
+        self.__global_uuid_file = os.path.join(self.data_dir, self.default_global_uuid_file)
+        self.__global_uuid = self.__handle_global_uuid(self.global_uuid_file)
 
     @property
     def data_dir(self):
         return self.__data_dir
-
-    @property
-    def prod(self) -> bool:
-        return self.__prod
 
     @property
     def mqtt_setting(self) -> MqttSetting:
@@ -50,28 +43,26 @@ class MqttRestBridge(metaclass=Singleton):
         return self.__global_uuid
 
     @property
-    def identifier(self) -> str:
-        return self.__identifier
-
-    @property
     def port(self) -> int:
         return self.__port
 
     def serialize(self, pretty=True) -> str:
         m = {
             MqttSetting.KEY: self.mqtt_setting,
-            'prod': self.prod,
             'data_dir': self.data_dir,
             'global_uuid': self.global_uuid
         }
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def start(self, loop_forever=True):
+    def start(self):
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
-        mqtt_client.start(self.__mqtt_setting, [f'{self.global_uuid}/{self.identifier}/#'], self.__callback,
-                          loop_forever)
+        subscribe_topics: List[str] = []
+        if self.mqtt_setting.master:
+            subscribe_topics.append(f'master/+/#')
+        subscribe_topics.append(f'{self.global_uuid}/#')
+        mqtt_client.start(self.__mqtt_setting, subscribe_topics, self.__callback)
         return self
 
     @staticmethod
@@ -87,15 +78,13 @@ class MqttRestBridge(metaclass=Singleton):
 
     @staticmethod
     def __handle_global_uuid(global_uuid_file) -> str:
-        if MqttRestBridge.prod:
-            existing_secret_key = read_file(global_uuid_file)
-            if existing_secret_key.strip():
-                return existing_secret_key
+        existing_secret_key = read_file(global_uuid_file)
+        if existing_secret_key.strip():
+            return existing_secret_key
 
-            global_uuid = MqttRestBridge.__create_global_uuid()
-            write_file(global_uuid_file, global_uuid)
-            return global_uuid
-        return ''
+        global_uuid = MqttRestBridge.__create_global_uuid()
+        write_file(global_uuid_file, global_uuid)
+        return global_uuid
 
     @staticmethod
     def __create_global_uuid() -> str:

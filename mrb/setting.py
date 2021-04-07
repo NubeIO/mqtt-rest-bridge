@@ -6,4 +6,5 @@ class MqttSetting(MqttSettingBase):
 
     def __init__(self):
         super().__init__()
+        self.master = False
         self.name = 'mqtt-rest-bridge'
