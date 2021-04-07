@@ -8,7 +8,7 @@ import gevent
 
 from mrb.brige import MqttRestBridge
 from mrb.message import Request, Response, MessageType, HttpMethod
-from mrb.store import Store
+from mrb.store import Store, StoreBroadcast
 
 logger = logging.getLogger(__name__)
 
@@ -29,28 +29,37 @@ def mqtt_to_rest_mapper(client, userdata, message):
 def _mqtt_to_rest_mapper_process(message):
     master: bool = False
     topic = message.topic.split('/')
-    if len(topic) == 4 and MqttRestBridge().mqtt_setting.master and topic[0] == 'master':
+    if topic[0] == 'master':
         master = True
-        slave_global_uuid: str = topic[1]
-        message_type: str = topic[2]
-        session_uuid: str = topic[3]
-    elif len(topic) == 3:
-        slave_global_uuid: str = topic[0]
-        message_type: str = topic[1]
-        session_uuid: str = topic[2]
+        if topic[1] == 'broadcast':
+            session_uuid: str = topic[2]
+            response: Response = Response().reload(json.loads(message.payload))
+            StoreBroadcast().append(session_uuid, response)
+            return
+        else:
+            slave_global_uuid: str = topic[2]
+            message_type: str = topic[3]
+            session_uuid: str = topic[4]
     else:
-        return
+        if topic[0] == 'broadcast':
+            session_uuid: str = topic[1]
+            serialize_response: str = request_api(message)
+            reply_topic: str = '/'.join(['master', 'broadcast', session_uuid])
+            from mrb.mqtt import MqttClient
+            MqttClient().publish_value(reply_topic, serialize_response)
+            return
+        else:
+            slave_global_uuid: str = topic[1]
+            message_type: str = topic[2]
+            session_uuid: str = topic[3]
 
     if message_type == MessageType.REQUEST.value:
-        logger.debug(f'Received request payload: {message.payload}')
-        request: Request = Request().reload(json.loads(message.payload))
-        response: Response = request.request()
-        serialize_response: str = response.serialize(pretty=False)
-        logger.debug(f'Reply response: {serialize_response}')
+        serialize_response: str = request_api(message)
         if master:
-            reply_topic: str = "/".join([slave_global_uuid, MessageType.RESPONSE.value, session_uuid])
+            reply_topic: str = "/".join(['unicast', slave_global_uuid, MessageType.RESPONSE.value, session_uuid])
         else:
-            reply_topic: str = "/".join(['master', slave_global_uuid, MessageType.RESPONSE.value, session_uuid])
+            reply_topic: str = "/".join(
+                ['master', 'unicast', slave_global_uuid, MessageType.RESPONSE.value, session_uuid])
         logger.debug(f'Reply topic: {reply_topic}')
         from mrb.mqtt import MqttClient
         MqttClient().publish_value(reply_topic, serialize_response)
@@ -61,12 +70,21 @@ def _mqtt_to_rest_mapper_process(message):
         Store().add(session_uuid, response)
 
 
-def api_to_topic_mapper(slave_global_uuid: str, api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
-                        headers: dict = None):
+def request_api(message) -> str:
+    logger.debug(f'Received request payload: {message.payload}')
+    request: Request = Request().reload(json.loads(message.payload))
+    response: Response = request.request()
+    serialize_response: str = response.serialize(pretty=False)
+    logger.debug(f'Reply response: {serialize_response}')
+    return serialize_response
+
+
+def api_to_slave_topic_mapper(slave_global_uuid: str, api: str, body: dict = None,
+                              http_method: HttpMethod = HttpMethod.GET, headers: dict = None):
     mrb: MqttRestBridge = MqttRestBridge()
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
-    topic: str = "/".join([slave_global_uuid, MessageType.REQUEST.value, session_uuid])
+    topic: str = "/".join(['unicast', slave_global_uuid, MessageType.REQUEST.value, session_uuid])
     publish_request(api, body, headers, http_method, topic)
     timeout: int = mrb.mqtt_setting.timeout
     start_time: float = time.time()
@@ -82,12 +100,30 @@ def api_to_topic_mapper(slave_global_uuid: str, api: str, body: dict = None, htt
                             status_code=408)
 
 
+def api_to_slaves_topic_mapper(api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
+                               headers: dict = None):
+    mrb: MqttRestBridge = MqttRestBridge()
+    api: str = api.strip("/")
+    session_uuid: str = __create_uuid()
+    topic: str = "/".join(['broadcast', session_uuid])
+    publish_request(api, body, headers, http_method, topic)
+    timeout: int = mrb.mqtt_setting.timeout
+    sleep(timeout)
+    response: Response = StoreBroadcast().get(session_uuid)
+    if response:
+        return response
+    else:
+        return Response(error=True,
+                        error_message=f'Not found exception',
+                        status_code=404)
+
+
 def api_to_master_topic_mapper(api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
                                headers: dict = None):
     mrb: MqttRestBridge = MqttRestBridge()
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
-    topic: str = "/".join(['master', mrb.global_uuid, MessageType.REQUEST.value, session_uuid])
+    topic: str = "/".join(['master', 'unicast', mrb.global_uuid, MessageType.REQUEST.value, session_uuid])
     publish_request(api, body, headers, http_method, topic)
     timeout: int = mrb.mqtt_setting.timeout
     start_time: float = time.time()

@@ -60,8 +60,10 @@ class MqttRestBridge(metaclass=Singleton):
         mqtt_client = MqttClient()
         subscribe_topics: List[str] = []
         if self.mqtt_setting.master:
-            subscribe_topics.append(f'master/+/#')
-        subscribe_topics.append(f'{self.global_uuid}/#')
+            subscribe_topics.append(f'master/unicast/+/#')
+            subscribe_topics.append(f'master/broadcast/#')
+        subscribe_topics.append(f'unicast/{self.global_uuid}/#')
+        subscribe_topics.append(f'broadcast/#')
         mqtt_client.start(self.__mqtt_setting, subscribe_topics, self.__callback)
         return self
 

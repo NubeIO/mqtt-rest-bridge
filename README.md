@@ -33,18 +33,18 @@ MqttRestBridge(port=8080, mqtt_setting=MqttSetting(), callback=callback)
 Example to GET value from slave:
 
 ```python
-from mrb.mapper import api_to_topic_mapper
+from mrb.mapper import api_to_slave_topic_mapper
 from mrb.message import Response, HttpMethod
 
-response: Response = api_to_topic_mapper(slave_global_uuid=f'<uuid>',
-                                         api=f'/api/generic/networks',
-                                         http_method=HttpMethod.GET)
+response: Response = api_to_slave_topic_mapper(slave_global_uuid=f'<uuid>',
+                                               api=f'/api/generic/networks',
+                                               http_method=HttpMethod.GET)
 ```
 
 Example to POST value to slave:
 ```python
 import json
-from mrb.mapper import api_to_topic_mapper
+from mrb.mapper import api_to_slave_topic_mapper
 from mrb.message import Response, HttpMethod
 
 body: json = {
@@ -52,22 +52,22 @@ body: json = {
     "enable": True,
     "history_enable": True
 }
-response: Response = api_to_topic_mapper(slave_global_uuid=f'<uuid>',
-                                         api=f"/api/generic/networks",
-                                         body=body,
-                                         headers={},
-                                         http_method=HttpMethod.POST)
+response: Response = api_to_slave_topic_mapper(slave_global_uuid=f'<uuid>',
+                                               api=f"/api/generic/networks",
+                                               body=body,
+                                               headers={},
+                                               http_method=HttpMethod.POST)
 ```
 
 Example to DELETE value on slave:
 
 ```python
-from mrb.mapper import api_to_topic_mapper
+from mrb.mapper import api_to_slave_topic_mapper
 from mrb.message import Response, HttpMethod
 
-response: Response = api_to_topic_mapper(slave_global_uuid=f'<uuid>',
-                                         api=f'/api/generic/networks/b7a23aa5-b8a1-4a0f-9acf-4fb011bce50e',
-                                         http_method=HttpMethod.DELETE)
+response: Response = api_to_slave_topic_mapper(slave_global_uuid=f'<uuid>',
+                                               api=f'/api/generic/networks/b7a23aa5-b8a1-4a0f-9acf-4fb011bce50e',
+                                               http_method=HttpMethod.DELETE)
 ```
 
 Example to GET value from master:
@@ -77,6 +77,16 @@ from mrb.mapper import api_to_master_topic_mapper
 from mrb.message import Response, HttpMethod
 
 response: Response = api_to_master_topic_mapper(api=f'/api/generic/networks',
+                                                http_method=HttpMethod.GET)
+```
+
+Example to GET values on master from slaves:
+
+```python
+from mrb.mapper import api_to_slaves_topic_mapper
+from mrb.message import Response, HttpMethod
+
+response: Response = api_to_slaves_topic_mapper(api=f'/api/system/ping',
                                                 http_method=HttpMethod.GET)
 ```
 
