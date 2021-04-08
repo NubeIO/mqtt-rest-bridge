@@ -15,10 +15,14 @@ logger = logging.getLogger(__name__)
 
 def mqtt_to_rest_mapper(client, userdata, message):
     """topic examples:
-    1. slave to master: master/<slave_global_uuid>+/<message_type>/<uuid>
-    2. master to slave: <slave_global_uuid>/<message_type>/<uuid>
+    1. master/unicast/<slave_global_uuid>+/<req|res>/<session_uuid>
+    2. master/broadcast/<slave_global_uuid>+/<session_uuid>
+    3. master/broadcast/<slave_global_uuid>+/<session_uuid>
+    4. broadcast/<session_uuid>
     :master                     for directing our request to master
-    :<slave_global_uuid>        for directing our request to slave device
+    :unicast                    for one-to-one flow
+    :broadcast                  for one-to-many flow (master to many slaves & many slaves to master)
+    :<slave_global_uuid>        for directing our request to slave device or for giving slave information
     :<message_type>             for parsing data whether it's request or response
     :<session_uuid>             for particular request/response cycle
     (there could be multiple request response for same REST request)
@@ -32,9 +36,10 @@ def _mqtt_to_rest_mapper_process(message):
     if topic[0] == 'master':
         master = True
         if topic[1] == 'broadcast':
-            session_uuid: str = topic[2]
+            slave_global_uuid: str = topic[2]
+            session_uuid: str = topic[3]
             response: Response = Response().reload(json.loads(message.payload))
-            StoreBroadcast().append(session_uuid, response)
+            StoreBroadcast().append(slave_global_uuid, session_uuid, response)
             return
         else:
             slave_global_uuid: str = topic[2]
@@ -44,7 +49,7 @@ def _mqtt_to_rest_mapper_process(message):
         if topic[0] == 'broadcast':
             session_uuid: str = topic[1]
             serialize_response: str = request_api(message)
-            reply_topic: str = '/'.join(['master', 'broadcast', session_uuid])
+            reply_topic: str = '/'.join(['master', 'broadcast', MqttRestBridge().global_uuid, session_uuid])
             from mrb.mqtt import MqttClient
             MqttClient().publish_value(reply_topic, serialize_response)
             return

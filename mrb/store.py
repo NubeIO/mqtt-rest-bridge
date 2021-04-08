@@ -15,7 +15,7 @@ class Store(metaclass=Singleton):
             return response
         return None
 
-    def add(self, uuid, response: Response):
+    def add(self, uuid: str, response: Response):
         self.__responses[uuid] = response
 
 
@@ -24,18 +24,17 @@ class StoreBroadcast(metaclass=Singleton):
         self.__responses: {[str]: List[Response]} = {}
 
     def get(self, uuid: str) -> Union[Response, None]:
-        responses: List[Response] = self.__responses.get(uuid)
-        response_return = Response(content=[])
-        if responses:
+        response: Response = self.__responses.get(uuid)
+        if response:
             del self.__responses[uuid]
-            for response in responses:
-                if not response.error:
-                    response_return.content.append(response.content)
-            return response_return
+            return response
         return None
 
-    def append(self, uuid, response: Response):
-        if not self.__responses.get(uuid):
-            self.__responses[uuid] = [response]
+    def append(self, slave_global_uuid: str, uuid: str, response: Response):
+        if response.error:
+            return
+        if self.__responses.get(uuid):
+            self.__responses[uuid].content[slave_global_uuid] = response.content
         else:
-            self.__responses[uuid].append(response)
+            self.__responses[uuid] = Response()
+            self.__responses[uuid].content[slave_global_uuid] = response.content

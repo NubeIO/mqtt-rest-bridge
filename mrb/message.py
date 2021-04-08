@@ -1,5 +1,4 @@
 import enum
-from typing import Dict, List, Union
 
 import requests
 from rubix_mqtt.setting import BaseSetting
@@ -59,7 +58,7 @@ class Response(BaseSetting):
     def __init__(self, content=None, status_code: int = 200, headers=None, error: bool = False, error_message=''):
         if content is None:
             content = {}
-        self.content: Union[Dict, List] = content
+        self.content: dict = content
         self.status_code: int = status_code
         self.headers = headers  # header is not in dictionary form
         self.error: bool = error
