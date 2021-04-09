@@ -83,10 +83,10 @@ response: Response = api_to_master_topic_mapper(api=f'/api/generic/networks',
 Example to GET values on master from slaves:
 
 ```python
-from mrb.mapper import api_to_slaves_topic_mapper
+from mrb.mapper import api_to_slaves_broadcast_topic_mapper
 from mrb.message import Response, HttpMethod
 
-response: Response = api_to_slaves_topic_mapper(api=f'/api/system/ping',
+response: Response = api_to_slaves_broadcast_topic_mapper(api=f'/api/system/ping',
                                                 http_method=HttpMethod.GET)
 ```
 

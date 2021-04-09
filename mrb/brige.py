@@ -38,18 +38,22 @@ class MqttRestBridge(metaclass=Singleton):
     def start(self):
         """
         Listeners are:
-        1. master/unicast/<slave_global_uuid>+/<req|res>/<session_uuid>
-        2. master/broadcast/<slave_global_uuid>+/<session_uuid>
+        1. master/unicast/<slave_global_uuid>+/<session_uuid>/<req|res>
+        2. master/multicast/<slave_global_uuid>+/<session_uuid>
         3. master/broadcast/<slave_global_uuid>+/<session_uuid>
-        4. broadcast/<session_uuid>
+        4. unicast/<slave_global_uuid>/<session_uuid>/<req|res>
+        5. multicast/<slave_global_uuid>/<session_uuid>
+        6. broadcast/<session_uuid>
         """
         from mrb.mqtt import MqttClient
         mqtt_client = MqttClient()
         subscribe_topics: List[str] = []
         if self.mqtt_setting.master:
             subscribe_topics.append(f'master/unicast/+/+/+')
+            subscribe_topics.append(f'master/multicast/+/+')
             subscribe_topics.append(f'master/broadcast/+/+')
         subscribe_topics.append(f'unicast/{self.global_uuid}/+/+')
+        subscribe_topics.append(f'multicast/{self.global_uuid}/+')
         subscribe_topics.append(f'broadcast/+')
         mqtt_client.start(self.__mqtt_setting, subscribe_topics, self.__callback)
         return self
