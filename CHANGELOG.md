@@ -1,4 +1,13 @@
 # CHANGELOG
+## [v1.2.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.2.0) (2020-04-05)
+### Added
+- Master <> Slave request/response change
+- Support broadcast and collect messages from slave
+- Use rubix-registry global_uuid (we were creating on this project itself)
+- Upgrade rubix-mqtt version (async MQTT connection)
+- Broadcast response change (wrap under guuid)
+- Multicast request support (collect data from multicasted slaves)
+
 ## [v1.1.4](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.1.4) (2020-03-10)
 ### Added
 - Make retain false
