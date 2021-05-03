@@ -100,13 +100,11 @@ def request_api(message) -> str:
 
 
 def api_to_slave_topic_mapper(slave_global_uuid: str, api: str, body: dict = None,
-                              http_method: HttpMethod = HttpMethod.GET, headers: dict = None):
-    mrb: MqttRestBridge = MqttRestBridge()
+                              http_method: HttpMethod = HttpMethod.GET, headers: dict = None, timeout: int = 10):
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
     topic: str = "/".join(['unicast', slave_global_uuid, session_uuid, MessageType.REQUEST.value])
     publish_request(api, body, headers, http_method, topic)
-    timeout: int = mrb.mqtt_setting.timeout
     start_time: float = time.time()
     while True:
         if time.time() - start_time <= timeout:
@@ -121,15 +119,13 @@ def api_to_slave_topic_mapper(slave_global_uuid: str, api: str, body: dict = Non
 
 
 def api_to_slaves_multicast_topic_mapper(slaves_global_uuids: List[str], api: str, body: dict = None,
-                                         http_method: HttpMethod = HttpMethod.GET,
-                                         headers: dict = None):
-    mrb: MqttRestBridge = MqttRestBridge()
+                                         http_method: HttpMethod = HttpMethod.GET, headers: dict = None,
+                                         timeout: int = 10):
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
     for slave_global_uuid in slaves_global_uuids:
         topic: str = "/".join(['multicast', slave_global_uuid, session_uuid])
         publish_request(api, body, headers, http_method, topic)
-    timeout: int = mrb.mqtt_setting.timeout
     start_time: float = time.time()
     while True:
         if time.time() - start_time <= timeout:
@@ -144,13 +140,11 @@ def api_to_slaves_multicast_topic_mapper(slaves_global_uuids: List[str], api: st
 
 
 def api_to_slaves_broadcast_topic_mapper(api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
-                                         headers: dict = None):
-    mrb: MqttRestBridge = MqttRestBridge()
+                                         headers: dict = None, timeout: int = 10):
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
     topic: str = "/".join(['broadcast', session_uuid])
     publish_request(api, body, headers, http_method, topic)
-    timeout: int = mrb.mqtt_setting.timeout
     sleep(timeout)
     response: Response = StoreBroadcast().get(session_uuid)
     if response:
@@ -162,13 +156,12 @@ def api_to_slaves_broadcast_topic_mapper(api: str, body: dict = None, http_metho
 
 
 def api_to_master_topic_mapper(api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
-                               headers: dict = None):
+                               headers: dict = None, timeout: int = 10):
     mrb: MqttRestBridge = MqttRestBridge()
     api: str = api.strip("/")
     session_uuid: str = __create_uuid()
     topic: str = "/".join(['master', 'unicast', mrb.global_uuid, session_uuid, MessageType.REQUEST.value])
     publish_request(api, body, headers, http_method, topic)
-    timeout: int = mrb.mqtt_setting.timeout
     start_time: float = time.time()
     while True:
         if time.time() - start_time <= timeout:
