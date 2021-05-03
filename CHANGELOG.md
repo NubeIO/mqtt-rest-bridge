@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.3.0) (2020-05-03)
+### Added
+- Timeout param support for MQTT > REST request
+
 ## [v1.2.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.2.0) (2020-04-05)
 ### Added
 - Master <> Slave request/response change
