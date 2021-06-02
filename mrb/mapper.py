@@ -175,7 +175,7 @@ def api_to_master_topic_mapper(api: str, body: dict = None, http_method: HttpMet
                             status_code=408)
 
 
-def publish_request(api, body, headers, http_method, topic):
+def publish_request(api: str, body: dict, headers: dict, http_method: HttpMethod, topic: str):
     logger.debug(f'Request topic: {topic}')
     request: Request = Request(api, body, headers, http_method)
     payload: str = request.serialize()

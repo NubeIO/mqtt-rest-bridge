@@ -35,31 +35,43 @@ class Request(BaseSetting):
         bridge: MqttRestBridge = MqttRestBridge()
         request_url: str = 'http://0.0.0.0:{}/{}'.format(bridge.port, self.api)
         try:
-            resp = requests.request(self.http_method, request_url, json=self.body, headers=self.headers,
-                                    params={'bridge': True})
+            content_type: str = self.headers.get('Content-Type', '') if self.headers else ""
+            if 'multipart/form-data' in content_type:
+                return Response(error=True,
+                                status_code=501,
+                                error_message=str("We don't have the multipart/form-data support yet!"))
+            else:
+                resp = requests.request(self.http_method,
+                                        request_url,
+                                        json=self.body,
+                                        headers=self.headers,
+                                        params={'bridge': True})
             status_code: int = resp.status_code
-            try:
-                content: dict = resp.json() if resp.text else {}
-            except ValueError:
-                return Response(status_code=404, error=True, error_message=resp.text)
+            if resp.headers['Content-Type'] == "application/json":
+                content = resp.json() if resp.text else {}
+            else:
+                content = resp.text
             error: bool = False
             error_message: str = ''
             if status_code not in range(200, 300):
                 error = True
-                error_message = content.get('message', '')
-                content = {}
-            headers = resp.raw.headers.items()
-            return Response(content, status_code, headers, error, error_message)
+                error_message = content.get('message', '') if isinstance(content, dict) else content
+                headers = resp.raw.headers.items()
+                headers.append(["Content-Type", "application/json"])
+                return Response(status_code=status_code, headers=headers, error=error, error_message=error_message)
+            else:
+                headers = resp.raw.headers.items()
+                return Response(content, status_code, headers, resp.headers.get('content-type'), error, error_message)
         except Exception as e:
             return Response(error=True, error_message=str(e))
 
 
 class Response(BaseSetting):
-    def __init__(self, content=None, status_code: int = 200, headers=None, error: bool = False, error_message=''):
-        if content is None:
-            content = {}
-        self.content: dict = content
+    def __init__(self, content=None, status_code: int = 200, headers=None, content_type='application/json',
+                 error: bool = False, error_message=''):
+        self.content = content or {}
         self.status_code: int = status_code
-        self.headers = headers  # header is not in dictionary form
+        self.headers = headers or [["Content-Type", "application/json"]]
+        self.content_type: str = content_type
         self.error: bool = error
         self.error_message: str = error_message
