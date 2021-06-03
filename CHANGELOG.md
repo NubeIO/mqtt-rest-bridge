@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.4.0) (2020-05-31)
+### Added
+- Support multiple Content-Types for upload/download
+
 ## [v1.3.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.3.0) (2020-05-03)
 ### Added
 - Timeout param support for MQTT > REST request
