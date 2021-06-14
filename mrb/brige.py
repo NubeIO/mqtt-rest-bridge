@@ -2,7 +2,7 @@ import json
 import os
 from typing import Callable, List
 
-from registry.registry import RubixRegistry
+from registry.resources.resource_device_info import get_device_info
 from rubix_mqtt.setting import BaseSetting
 
 from mrb.setting import MqttSetting
@@ -24,7 +24,7 @@ class MqttRestBridge(metaclass=Singleton):
 
     @property
     def global_uuid(self) -> str:
-        return RubixRegistry().read_wires_plat().get('global_uuid')
+        return get_device_info().global_uuid
 
     @property
     def port(self) -> int:
