@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [v1.5.1](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.5.1) (2020-06-21)
+- rubix-registry upgrade for get/put issue fix
+
 ## [v1.5.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.5.0) (2020-06-14)
 - rubix-registry upgrade for global_uuid
 
