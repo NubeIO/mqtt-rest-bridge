@@ -30,11 +30,19 @@ class StoreMulticast(metaclass=Singleton):
     def __init__(self):
         self.__responses: {[str]: Multicast} = {}
 
-    def get(self, slaves_global_uuids: List[str], uuid: str) -> Union[Response, None]:
+    def get(self, slaves_global_uuids: List[str], uuid: str, force=False, message=None) -> Union[Response, None]:
         response: {[str]: Multicast} = self.__responses.get(uuid)
         if response:
             if len(response.slaves_global_uuids) == len(slaves_global_uuids):
                 del self.__responses[uuid]
+                return response.response
+            if force:
+                for slave_global_uuid in slaves_global_uuids:
+                    if slave_global_uuid not in response.slaves_global_uuids:
+                        self.__responses[uuid].response.content[slave_global_uuid] = {
+                            'error': True,
+                            'data': 'Timeout' if not message else message
+                        }
                 return response.response
         return None
 
@@ -44,7 +52,10 @@ class StoreMulticast(metaclass=Singleton):
         self.__responses[uuid].slaves_global_uuids.append(slave_global_uuid)
         if response.error:
             return
-        self.__responses[uuid].response.content[slave_global_uuid] = response.content
+        self.__responses[uuid].response.content[slave_global_uuid] = {
+            'error': False,
+            'data': response.content
+        }
 
 
 class StoreBroadcast(metaclass=Singleton):

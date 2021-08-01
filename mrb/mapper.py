@@ -134,9 +134,10 @@ def api_to_slaves_multicast_topic_mapper(slaves_global_uuids: List[str], api: st
             if response:
                 return response
         else:
-            return Response(error=True,
-                            error_message=f'Slaves multicast request timeout, exceed the time {timeout} secs',
-                            status_code=408)
+            return StoreMulticast().get(slaves_global_uuids,
+                                        session_uuid,
+                                        True,
+                                        f'Slaves multicast request timeout, exceed the time {timeout} secs')
 
 
 def api_to_slaves_broadcast_topic_mapper(api: str, body: dict = None, http_method: HttpMethod = HttpMethod.GET,
