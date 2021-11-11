@@ -1,4 +1,6 @@
 # CHANGELOG
+## [v1.7.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.7.0) (2020-11-11)
+- Upgrade rubix-registry
 
 ## [v1.6.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.6.0) (2020-08-01)
 - Response back even when all multicast doesn't response
