@@ -1,4 +1,4 @@
 paho-mqtt==1.5.1
 requests==2.25.1
 rubix-mqtt@ git+https://github.com/NubeIO/rubix-mqtt@v1.2.0
-rubix-registry@ git+https://github.com/NubeIO/rubix-registry@v1.1.1
+rubix-registry@ git+https://github.com/NubeIO/rubix-registry@v1.1.2
