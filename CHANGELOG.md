@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.8.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.8.0) (2022-01-21)
+- Upgrade rubix-mqtt to v1.3.0
+
 ## [v1.7.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.7.0) (2020-11-11)
 - Upgrade rubix-registry
 
