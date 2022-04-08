@@ -1,12 +1,15 @@
 import json
 import os
-from typing import Callable, List
+from typing import Callable, List, Union
 
+from registry.models.model_device_info import DeviceInfoModel
 from registry.resources.resource_device_info import get_device_info
 from rubix_mqtt.setting import BaseSetting
 
 from mrb.setting import MqttSetting
 from mrb.utils.singleton import Singleton
+
+device_info_model: Union[DeviceInfoModel, None] = get_device_info()
 
 
 class MqttRestBridge(metaclass=Singleton):
@@ -24,7 +27,7 @@ class MqttRestBridge(metaclass=Singleton):
 
     @property
     def global_uuid(self) -> str:
-        return get_device_info().global_uuid
+        return device_info_model.global_uuid
 
     @property
     def port(self) -> int:
