@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.8.1](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.8.1) (2022-04-08)
+- Improvement: Too many open files
+
 ## [v1.8.0](https://github.com/NubeIO/mqtt-rest-bridge/tree/v1.8.0) (2022-01-21)
 - Upgrade rubix-mqtt to v1.3.0
 
